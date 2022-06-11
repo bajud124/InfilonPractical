@@ -1,3 +1,5 @@
+using InfilonPractical.Interface;
+using InfilonPractical.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -23,7 +25,11 @@ namespace InfilonPractical
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            IConfigurationSection appSettingsSection = this.Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+            AppSettings appSettings = appSettingsSection.Get<AppSettings>();
             services.AddControllersWithViews();
+            services.AddTransient<IUserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

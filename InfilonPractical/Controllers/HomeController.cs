@@ -1,4 +1,5 @@
-﻿using InfilonPractical.Models;
+﻿using InfilonPractical.Interface;
+using InfilonPractical.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -11,27 +12,49 @@ namespace InfilonPractical.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IUserService _userService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IUserService userService)
         {
-            _logger = logger;
+            _userService = userService;
         }
 
         public IActionResult Index()
         {
+            List<UserEntity> users = _userService.GetAll();
+            return View(users);
+        }
+
+        public IActionResult Edit(int? id)
+        {
+            UserEntity user = _userService.GetById(id);
+            return View(user);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(UserEntity model)
+        {
+            if (ModelState.IsValid)
+            {
+                _userService.SaveUser(model);
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 
-        public IActionResult Privacy()
+        [HttpPost]
+        [Route("InsertUser")]
+        public IActionResult InsertUser()
         {
-            return View();
+            _userService.Insert();
+            return null;
         }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [HttpGet]
+        [Route("getAllAsJson")]
+        public IActionResult GetAllAsJson()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            List<UserListJson> users = _userService.GetAllAsJson();
+            return Ok(users);
         }
     }
 }
